@@ -1,13 +1,33 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-alpine
+# Stage 1: Build the application
+FROM eclipse-temurin:17-jdk AS build
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the jar file from the target directory (Maven) or build/libs (Gradle)
-ARG JAR_FILE=target/*.jar
+# Copy Maven wrapper and pom.xml
+COPY mvnw .
+COPY mvnw.cmd .
+COPY .mvn .mvn
+COPY pom.xml .
 
-COPY ${JAR_FILE} app.jar
+# Make mvnw executable
+RUN chmod +x ./mvnw
+
+# Download dependencies
+RUN ./mvnw dependency:go-offline
+
+# Copy source code
+COPY src src
+
+# Build the application
+RUN ./mvnw package -DskipTests
+
+# Stage 2: Run the application
+FROM eclipse-temurin:17-jdk
+
+WORKDIR /app
+
+# Copy the jar file from the build stage
+COPY --from=build /app/target/*.jar app.jar
 
 # Expose the port on which the Spring Boot application will run
 EXPOSE 8080

@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_API_KEY=your_groq_api_key_here
     networks:
       - app-network
 
@@ -24,3 +24,8 @@ services:
 networks:
   app-network:
     driver: bridge
+
+# 사용 방법:
+# 1. GROQ_API_KEY를 실제 API 키로 변경
+# 2. docker-compose up --build 실행
+

@@ -1,195 +1,124 @@
-# spring-boot-ai-chatbot
-Your friendly personal assistant powered by OpenAI
+# AI Chatbot - Spring Boot + React + Groq Llama 3.1
 
-Here’s a detailed README file template for your project. This template covers the main aspects of your project, including an overview, installation steps, usage instructions, and more. You can customize it further according to your project’s specifics.
+Groq의 Llama 3.1 모델을 사용하는 AI 챗봇 애플리케이션입니다.
 
----
+## 기술 스택
 
-# Spring AI Chatbot Learning Application
+- **Backend**: Spring Boot 3.3.3 + Spring AI
+- **Frontend**: React
+- **AI Model**: Groq Llama 3.1-8b-instant
+- **Deployment**: Docker & Docker Compose
 
-## Overview
+## 시작하기
 
-This project is a full-stack web application built with Spring Boot, Spring AI, React, and Docker. It serves as a learning tool for developers who want to get hands-on experience with Spring AI, leveraging the OpenAI API to create an intelligent chatbot. The chatbot can assist users in learning more about Spring AI by answering questions and providing information based on user queries.
+### 1. Groq API 키 발급
 
-## Features
+1. [Groq Console](https://console.groq.com)에 접속
+2. 계정 생성 또는 로그인
+3. API Keys 섹션에서 새 API 키 생성
 
-- **Interactive Chatbot**: Engage with a chatbot to learn more about Spring AI and how to integrate it with your Spring Boot applications.
-- **Spring Boot Backend**: A robust backend powered by Spring Boot, utilizing Spring AI for processing and generating responses using the OpenAI API.
-- **React Frontend**: A user-friendly and responsive frontend built with React, providing an intuitive interface to interact with the chatbot.
-- **Dockerized Setup**: Both the frontend and backend are containerized using Docker, allowing easy setup and deployment.
+### 2. 환경 변수 설정
 
-## Demo
-
-Here’s a quick demo of how the project works:
-
-### Image Example
-
-![Project Screenshot](./chatbot-ui-screenshot.png)
-
-### Video Example
-
-Watch the demo video:
-
-![Watch the video](./chatbot.gif.gif)
-
-
-## Tech Stack
-
-- **Backend**: 
-  - Java 17
-  - Spring Boot
-  - Spring AI
-  - OpenAI API
-- **Frontend**:
-  - React
-  - HTML5 & CSS3
-  - Axios
-  - Nginx (for serving the React app)
-- **DevOps**:
-  - Docker
-  - Docker Compose
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your machine:
-
-- [Docker](https://www.docker.com/products/docker-desktop)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [Java 17](https://adoptopenjdk.net/) (if running the Spring Boot app locally)
-- [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) (if running the React app locally)
-
-## Getting Started
-
-### Clone the Repository
+프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 API 키를 설정합니다:
 
 ```bash
-git clone https://github.com/vikasrajputin/spring-ai-chatbot.git
-cd spring-ai-chatbot
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-### Project Structure
+또는 docker-compose.yaml 파일에서 직접 환경 변수를 설정할 수 있습니다.
 
-The project is organized into two main directories:
+### 3. Docker로 실행
 
-- **spring-boot-ai-chatbot/**: Contains the Spring Boot application with Spring AI integration.
-- **chatbot-ui/**: Contains the React application that serves as the chatbot interface.
+```bash
+# 빌드 및 실행
+docker-compose up --build
 
-### Setting Up the Environment
+# 백그라운드 실행
+docker-compose up -d
 
-Before running the application, make sure to set up the environment variables for accessing the OpenAI API.
+# 중지
+docker-compose down
+```
 
-1. **Create a `.env` file in the `spring-boot-ai-chatbot` directory**:
+### 4. 접속
 
-    ```bash
-    OPENAI_API_KEY=your_openai_api_key
-    ```
+- **Frontend (React UI)**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **API 테스트**: http://localhost:8080/ai/chat/string?message=Hello
 
-2. **(Optional) Create a `.env` file in the `chatbot-ui` directory if needed**.
+## API 사용 예시
 
-### Running the Application with Docker
+```bash
+# 간단한 메시지 전송
+curl "http://localhost:8080/ai/chat/string?message=Hello"
 
-The project is fully dockerized, making it easy to run both the frontend and backend together.
+# POST 요청으로 메시지 전송
+curl -X POST "http://localhost:8080/ai/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Explain Spring AI"}'
+```
 
-1. **Build and run the containers**:
+## 프로젝트 구조
 
-    ```bash
-    docker-compose up --build
-    ```
+```
+.
+├── spring-boot-ai-chatbot/     # Spring Boot 백엔드
+│   ├── src/
+│   │   └── main/
+│   │       └── resources/
+│   │           └── application.yaml
+│   └── Dockerfile
+├── chatbot-ui/                  # React 프론트엔드
+│   ├── src/
+│   ├── public/
+│   └── Dockerfile
+└── docker-compose.yaml
+```
 
-2. **Access the application**:
+## 개발 환경에서 실행
 
-    - The Spring Boot application (backend) will be available at: `http://localhost:8080`
-    - The React application (frontend) will be available at: `http://localhost:3000`
+### Backend
 
-### Running the Applications Locally (Without Docker)
+```bash
+cd spring-boot-ai-chatbot
+export GROQ_API_KEY=your_api_key_here
+./mvnw spring-boot:run
+```
 
-#### Backend (Spring Boot)
+### Frontend
 
-1. **Navigate to the `spring-boot-ai-chatbot/` directory**:
+```bash
+cd chatbot-ui
+npm install
+npm start
+```
 
-    ```bash
-    cd spring-boot-ai-chatbot/
-    ```
+## 보안 주의사항
 
-2. **Build and run the Spring Boot application**:
+⚠️ **중요**: API 키를 절대 Git에 커밋하지 마세요!
 
-    ```bash
-    ./mvnw clean install spring-boot:run
-    ```
+- `.env` 파일은 `.gitignore`에 추가되어 있습니다
+- `docker-compose.yaml`에 직접 API 키를 입력한 경우, 해당 파일을 커밋하지 마세요
+- 환경 변수를 사용하여 API 키를 관리하세요
 
-3. **Access the backend API**: `http://localhost:8080`
+## 문제 해결
 
-#### Frontend (React)
+### Docker 빌드 실패
 
-1. **Navigate to the `chatbot-ui/` directory**:
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
+```
 
-    ```bash
-    cd chatbot-ui
-    ```
+### API 키 오류
 
-2. **Install the dependencies**:
+환경 변수가 제대로 설정되었는지 확인:
 
-    ```bash
-    npm install
-    ```
+```bash
+echo $GROQ_API_KEY
+```
 
-3. **Start the React application**:
+## 라이선스
 
-    ```bash
-    npm start
-    ```
-
-4. **Access the frontend**: `http://localhost:3000`
-
-### API Endpoints
-
-The backend provides the following key API endpoints:
-
-- **`GET /ai/chat/string`**: Accepts a `message` query parameter and returns a response generated by the AI model.
-  - **Example**: `http://localhost:8080/ai/chat/string?message=Tell me about Spring AI`
-  
-- **`POST /ai/chat`**: Accepts a JSON body with a `message` field and returns a response generated by the AI model.
-  - **Example**:
-    ```json
-    POST http://localhost:8080/ai/chat
-    Content-Type: application/json
-    
-    {
-      "message": "Explain how to use OpenAI with Spring Boot"
-    }
-    ```
-
-## Customization
-
-### Modifying the Frontend
-
-- The React frontend is located in the `chatbot-ui/` directory.
-- You can customize the UI by editing the components in the `src/` directory.
-- Update the styling by modifying the `Chatbot.css` file.
-
-### Modifying the Backend
-
-- The Spring Boot backend is located in the `spring-boot-ai-chatbot/` directory.
-- You can customize the AI responses by modifying the services and controllers in the `src/main/java` directory.
-- Update the Spring AI configuration in the `application.yml` file.
-
-## Deployment
-
-### Docker Deployment on Local
-
-To deploy the application to a local environment, you can use the Docker images built with the provided Dockerfiles.
-
-1. **Build the Docker images**:
-
-    ```bash
-    docker-compose build
-    ```
-
-### Manual Deployment (Without Docker)
-
-- **Backend**: Deploy the Spring Boot jar to a server or cloud service (e.g., AWS EC2, Heroku).
-- **Frontend**: Build the React app (`npm run build`) and serve it using a web server (e.g., Nginx, Apache).
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+MIT License
