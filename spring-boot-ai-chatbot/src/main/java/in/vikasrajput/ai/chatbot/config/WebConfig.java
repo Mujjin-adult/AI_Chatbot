@@ -14,10 +14,11 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Apply CORS to all endpoints
-                        .allowedOrigins("http://localhost:3000") // Allowed origin (replace with your frontend URL)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH") // Allowed methods
+                        .allowedOriginPatterns("*") // Allow all origins
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // Allowed methods
                         .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true); // Allow credentials (e.g., cookies)
+                        .allowCredentials(false) // Disable credentials for broader compatibility
+                        .maxAge(3600); // Cache preflight response for 1 hour
             }
         };
     }

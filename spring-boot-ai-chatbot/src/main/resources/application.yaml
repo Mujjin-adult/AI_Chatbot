@@ -8,4 +8,6 @@ spring:
       chat:
         options:
           model: "llama-3.1-8b-instant"
-          temperature: "0.7"
+          temperature: "0.7"      # 0.0~1.0: 낮을수록 일관적, 높을수록 창의적 | 보통 0.3-0.5 (사실적 답변), 0.7-0.9 (창의적 답변)
+          max-tokens: 1000        # 응답 최대 길이 제한
+          top-p: "0.9"            # 응답의 다양성 제어 (0.0~1.0)

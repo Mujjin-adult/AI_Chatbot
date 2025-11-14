@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { FaPaperPlane } from 'react-icons/fa';
 import './Chatbot.css';
 
@@ -12,17 +11,95 @@ const Chatbot = () => {
         if (input.trim() === '') return;
         
         const newMessage = { text: input, sender: 'user' };
-        setMessages([...messages, newMessage]);
+        const updatedMessages = [...messages, newMessage];
+        setMessages(updatedMessages);
         setInput('');
         setLoading(true);
 
         try {
-            const response = await axios.get('http://localhost:8080/ai/chat/string?message=' + input);
-            const aiMessage = { text: response.data, sender: 'ai' };
-            setMessages([...messages, newMessage, aiMessage]);
+            const response = await fetch('http://localhost:8080/ai/chat/string?message=' + encodeURIComponent(input), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/event-stream',
+                    'Cache-Control': 'no-cache', // 캐시 방지
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let aiText = '';
+            let buffer = ''; // 불완전한 라인을 저장할 버퍼
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                // UTF-8 디코딩 (스트림 모드로)
+                const chunk = decoder.decode(value, { stream: true });
+                
+                // 버퍼에 추가
+                buffer += chunk;
+                
+                // 완전한 라인들을 처리
+                const lines = buffer.split('\n');
+                
+                // 마지막 라인은 불완전할 수 있으므로 버퍼에 보관
+                buffer = lines.pop() || '';
+                
+                // 완전한 라인들만 처리
+                for (const line of lines) {
+                    if (line.startsWith('data:')) {
+                        const text = line.substring(5); // "data:" 제거
+                        // 완전히 빈 줄이 아닌 경우만 추가
+                        if (text !== '') {
+                            aiText += text;
+                        }
+                    }
+                }
+                
+                // 실시간으로 메시지 업데이트 (aiText가 있을 때만)
+                if (aiText) {
+                    setMessages([...updatedMessages, { text: aiText, sender: 'ai' }]);
+                }
+            }
+            
+            // 마지막 남은 바이트 처리
+            const finalChunk = decoder.decode();
+            if (finalChunk) {
+                buffer += finalChunk;
+            }
+            
+            // 버퍼에 남은 라인들 처리
+            if (buffer) {
+                const finalLines = buffer.split('\n');
+                for (const line of finalLines) {
+                    if (line.startsWith('data:')) {
+                        const text = line.substring(5);
+                        if (text !== '') {
+                            aiText += text;
+                        }
+                    }
+                }
+            }
+            
+            // 최종 메시지 업데이트
+            if (aiText) {
+                setMessages([...updatedMessages, { text: aiText, sender: 'ai' }]);
+            } else {
+                // 응답이 없는 경우 에러 메시지
+                const errorMessage = { text: '응답을 받지 못했습니다.', sender: 'ai' };
+                setMessages([...updatedMessages, errorMessage]);
+            }
+
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching AI response", error);
-        } finally {
+            const errorMessage = { text: '죄송합니다. 오류가 발생했습니다: ' + error.message, sender: 'ai' };
+            setMessages([...updatedMessages, errorMessage]);
             setLoading(false);
         }
     };
