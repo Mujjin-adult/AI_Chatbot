@@ -44,7 +44,6 @@ docker-compose down
 
 - **Frontend (React UI)**: http://localhost:3000
 - **Backend API**: http://localhost:8080
-- **API 테스트**: http://localhost:8080/ai/chat/string?message=Hello
 
 ## API 사용 예시
 
